@@ -41,3 +41,8 @@ daily-expense-tracker/
 └── js/
     └── app.js
 ```
+
+
+## Appearance
+
+The interface supports liquid-glass light and dark modes. Your selected appearance is remembered in the browser using local storage.
