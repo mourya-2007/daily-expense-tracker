@@ -208,7 +208,7 @@ function renderDashboard() {
 
   $("#todaySpent").textContent = formatMoney(totalOf(todayItems));
   $("#monthSpent").textContent = formatMoney(monthlyTotal);
-  $("#dailyAverage").textContent = formatMoney(monthlyTotal / Math.max(1, dayNumber));
+
 
   renderBudget(monthlyTotal);
 
