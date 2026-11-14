@@ -366,7 +366,7 @@ function handleExpenseSubmit(event) {
     return;
   }
 
-  expenses.push({
+  expenses.unshift({
     id: createId(),
     amount,
     title,
