@@ -204,8 +204,6 @@ function renderDashboard() {
   const monthItems = getMonthExpenses();
   const todayItems = expenses.filter((item) => item.date === dateKey());
   const monthlyTotal = totalOf(monthItems);
-  const dayNumber = new Date().getDate();
-
   $("#todaySpent").textContent = formatMoney(totalOf(todayItems));
   $("#monthSpent").textContent = formatMoney(monthlyTotal);
 
