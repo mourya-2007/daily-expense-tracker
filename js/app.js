@@ -179,17 +179,15 @@ function renderBudget(spent) {
   const remaining = monthlyBudget - spent;
   const overBudget = remaining < 0;
 
-  $("#budgetRemaining").textContent = formatMoney(remaining);
-  $("#budgetCaption").textContent = overBudget ? "You are over your monthly budget" : "Available this month";
+  $("#budgetRemaining").textContent = formatMoney(Math.max(0, remaining));
+  $("#budgetCaption").textContent = overBudget ? "over your monthly limit" : "remaining this month";
   $("#budgetProgress").style.width = cappedUsage + "%";
   $("#budgetProgress").style.background = overBudget ? "var(--red)" : "var(--green)";
   $("#budgetSpent").textContent = formatMoney(spent);
   $("#budgetLimit").textContent = formatMoney(monthlyBudget);
-  $("#budgetPercent").textContent = Math.round(usage) + "%";
-  $("#budgetRing").style.background = `conic-gradient(${overBudget ? "var(--red)" : "var(--green)"} 0 ${cappedUsage}%, #293542 ${cappedUsage}% 100%)`;
   $("#budgetStatus").textContent = overBudget
-    ? "Budget exceeded"
-    : usage > 80 ? "Getting close to your limit" : "You're on track";
+    ? `${formatMoney(Math.abs(remaining))} over budget`
+    : usage > 80 ? "Close to your monthly limit" : "You're on track";
   $("#budgetStatus").style.color = overBudget ? "var(--red)" : "var(--green)";
 
   $("#budgetPageSpent").textContent = formatMoney(spent);
@@ -199,7 +197,6 @@ function renderBudget(spent) {
     ? `${formatMoney(Math.abs(remaining))} over budget · ${Math.round(usage)}% used`
     : `${formatMoney(remaining)} remaining · ${Math.round(usage)}% used`;
 
-  $("#dashboardBudget").placeholder = monthlyBudget.toLocaleString("en-IN");
   $("#pageBudget").placeholder = monthlyBudget.toLocaleString("en-IN");
 }
 
@@ -214,9 +211,8 @@ function renderDashboard() {
   $("#dailyAverage").textContent = formatMoney(monthlyTotal / Math.max(1, dayNumber));
 
   renderBudget(monthlyTotal);
-  renderCategoryBreakdown($("#categoryBreakdown"), monthItems);
 
-  const recent = [...expenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+  const recent = [...expenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
   $("#recentTransactions").innerHTML = recent.length
     ? recent.map(transactionMarkup).join("")
     : '<p class="empty-state">No transactions yet. Add your first expense!</p>';
@@ -243,22 +239,22 @@ function drawSpendingChart() {
       labels,
       datasets: [{
         data: values,
-        borderColor: "#4edea3",
-        backgroundColor: "rgba(78, 222, 163, .12)",
+        borderColor: "#3d8062",
+        backgroundColor: "rgba(61, 128, 98, .10)",
         fill: true,
         tension: .35,
         pointRadius: 3,
-        pointBackgroundColor: "#4edea3"
+        pointBackgroundColor: "#3d8062"
       }]
     },
     options: {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false }, ticks: { color: "#91a0af" } },
+        x: { grid: { display: false }, ticks: { color: "#77827b" } },
         y: {
           beginAtZero: true,
-          grid: { color: "#283442" },
+          grid: { color: "#e5e9e2" },
           ticks: { color: "#91a0af", callback: (value) => "₹" + value }
         }
       }
@@ -281,7 +277,7 @@ function drawCategoryChart() {
       datasets: [{
         data: labels.map((label) => totals[label]),
         backgroundColor: labels.map((label) => (CATEGORY_META[label] || CATEGORY_META.Other).color),
-        borderColor: "#151c26",
+        borderColor: "#ffffff",
         borderWidth: 4
       }]
     },
@@ -290,7 +286,7 @@ function drawCategoryChart() {
       plugins: {
         legend: {
           position: "bottom",
-          labels: { color: "#cbd5df", padding: 16, usePointStyle: true }
+          labels: { color: "#59655d", padding: 16, usePointStyle: true }
         }
       }
     }
@@ -301,8 +297,10 @@ function renderApp() {
   renderDashboard();
   renderTransactionList();
   renderCategoryBreakdown($("#analyticsCategories"), getMonthExpenses());
-  drawSpendingChart();
-  if ($("#analytics").classList.contains("active")) drawCategoryChart();
+  if ($("#analytics").classList.contains("active")) {
+    drawSpendingChart();
+    drawCategoryChart();
+  }
 }
 
 function setBudget(value) {
@@ -378,6 +376,7 @@ function handleExpenseSubmit(event) {
   saveData();
   event.currentTarget.reset();
   $("#expenseDate").value = dateKey();
+  $("#expenseDialog").close();
   renderApp();
   showToast("Expense saved successfully.");
 }
@@ -386,7 +385,12 @@ function showPage(pageName) {
   $$(".page").forEach((page) => page.classList.toggle("active", page.id === pageName));
   $$(".nav-link").forEach((button) => button.classList.toggle("active", button.dataset.page === pageName));
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (pageName === "analytics") window.requestAnimationFrame(drawCategoryChart);
+  if (pageName === "analytics") {
+    window.requestAnimationFrame(() => {
+      drawSpendingChart();
+      drawCategoryChart();
+    });
+  }
 }
 
 function handleListAction(event) {
@@ -407,11 +411,6 @@ function initializeApp() {
     window.setTimeout(() => { $("#expenseDate").value = dateKey(); }, 0);
   });
 
-  $("#dashboardBudgetForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    setBudget($("#dashboardBudget").value);
-    $("#dashboardBudget").value = "";
-  });
   $("#budgetPageForm").addEventListener("submit", (event) => {
     event.preventDefault();
     setBudget($("#pageBudget").value);
@@ -426,9 +425,13 @@ function initializeApp() {
   });
 
   $("#jumpToExpense").addEventListener("click", () => {
-    showPage("dashboard");
-    $("#quickExpensePanel").scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => $("#expenseAmount").focus(), 350);
+    $("#expenseDialog").showModal();
+    window.setTimeout(() => $("#expenseAmount").focus(), 80);
+  });
+  $("#closeExpenseDialog").addEventListener("click", () => $("#expenseDialog").close());
+  $("#cancelExpense").addEventListener("click", () => $("#expenseDialog").close());
+  $("#expenseDialog").addEventListener("click", (event) => {
+    if (event.target === $("#expenseDialog")) $("#expenseDialog").close();
   });
 
   $("#transactionSearch").addEventListener("input", renderTransactionList);
