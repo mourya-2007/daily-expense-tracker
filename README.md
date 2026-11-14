@@ -4,13 +4,13 @@ A personal expense tracker built with **HTML, CSS and vanilla JavaScript**. It u
 
 ## Features
 
-- Dashboard with today's spending, monthly total, remaining budget and daily average
+- Dashboard with today's spending, monthly total, remaining budget and recent activity
 - Add, edit and delete expenses
 - Expense categories, dates and optional notes
 - Transaction history with search and category filtering
 - Monthly budget and progress indicator
 - Spending trend and category analytics with Chart.js
-- Responsive dark interface with INR formatting
+- Responsive liquid-glass interface with light/dark modes and INR formatting
 
 ## Run locally
 
