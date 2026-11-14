@@ -1,5 +1,6 @@
 const EXPENSES_KEY = "daily-ledger-expenses-v1";
 const BUDGET_KEY = "daily-ledger-budget-v1";
+const THEME_KEY = "daily-ledger-theme";
 const DEFAULT_BUDGET = 10000;
 
 const CATEGORY_META = {
@@ -40,6 +41,61 @@ function isValidExpense(item) {
 function loadBudget() {
   const saved = Number(localStorage.getItem(BUDGET_KEY));
   return Number.isFinite(saved) && saved > 0 ? saved : DEFAULT_BUDGET;
+}
+
+function applyTheme(theme, persist = true) {
+  const selectedTheme = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = selectedTheme;
+
+  const lightButton = $("#lightModeButton");
+  const darkButton = $("#darkModeButton");
+  lightButton.classList.toggle("active", selectedTheme === "light");
+  darkButton.classList.toggle("active", selectedTheme === "dark");
+  lightButton.setAttribute("aria-pressed", String(selectedTheme === "light"));
+  darkButton.setAttribute("aria-pressed", String(selectedTheme === "dark"));
+
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) themeColor.content = selectedTheme === "dark" ? "#101916" : "#eaf1ee";
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_KEY, selectedTheme);
+    } catch (error) {
+      console.warn("Could not save theme preference:", error);
+    }
+  }
+
+  if ($("#analytics")?.classList.contains("active")) {
+    window.requestAnimationFrame(() => {
+      drawSpendingChart();
+      drawCategoryChart();
+    });
+  }
+}
+
+function initializeTheme() {
+  let savedTheme = "light";
+  try {
+    savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  } catch (error) {
+    console.warn("Could not read theme preference:", error);
+  }
+
+  applyTheme(savedTheme, false);
+  $("#lightModeButton").addEventListener("click", () => applyTheme("light"));
+  $("#darkModeButton").addEventListener("click", () => applyTheme("dark"));
+}
+
+function getChartTheme() {
+  const isDark = document.documentElement.dataset.theme === "dark";
+  return {
+    text: isDark ? "#a9bcb0" : "#75877e",
+    grid: isDark ? "rgba(215,235,220,.13)" : "rgba(111,139,124,.16)",
+    line: isDark ? "#92c9ac" : "#4e8b70",
+    fill: isDark ? "rgba(146,201,172,.12)" : "rgba(78,139,112,.11)",
+    doughnutBorder: isDark ? "#1c2b24" : "#ffffff",
+    legend: isDark ? "#d0ded4" : "#59655d"
+  };
 }
 
 function dateKey(date = new Date()) {
@@ -231,29 +287,30 @@ function drawSpendingChart() {
   }
 
   if (spendingChart) spendingChart.destroy();
+  const chartColors = getChartTheme();
   spendingChart = new Chart(canvas, {
     type: "line",
     data: {
       labels,
       datasets: [{
         data: values,
-        borderColor: "#b96d4c",
-        backgroundColor: "rgba(185, 109, 76, .12)",
+        borderColor: chartColors.line,
+        backgroundColor: chartColors.fill,
         fill: true,
         tension: .35,
         pointRadius: 3,
-        pointBackgroundColor: "#b96d4c"
+        pointBackgroundColor: chartColors.line
       }]
     },
     options: {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false }, ticks: { color: "#77827b" } },
+        x: { grid: { display: false }, ticks: { color: chartColors.text } },
         y: {
           beginAtZero: true,
-          grid: { color: "#e8e0d5" },
-          ticks: { color: "#91a0af", callback: (value) => "₹" + value }
+          grid: { color: chartColors.grid },
+          ticks: { color: chartColors.text, callback: (value) => "₹" + value }
         }
       }
     }
@@ -267,6 +324,7 @@ function drawCategoryChart() {
   const totals = getCategoryTotals(getMonthExpenses());
   const labels = Object.keys(totals);
   if (categoryChart) categoryChart.destroy();
+  const chartColors = getChartTheme();
 
   categoryChart = new Chart(canvas, {
     type: "doughnut",
@@ -275,7 +333,7 @@ function drawCategoryChart() {
       datasets: [{
         data: labels.map((label) => totals[label]),
         backgroundColor: labels.map((label) => (CATEGORY_META[label] || CATEGORY_META.Other).color),
-        borderColor: "#ffffff",
+        borderColor: chartColors.doughnutBorder,
         borderWidth: 4
       }]
     },
@@ -284,7 +342,7 @@ function drawCategoryChart() {
       plugins: {
         legend: {
           position: "bottom",
-          labels: { color: "#59655d", padding: 16, usePointStyle: true }
+          labels: { color: chartColors.legend, padding: 16, usePointStyle: true }
         }
       }
     }
@@ -399,6 +457,7 @@ function handleListAction(event) {
 }
 
 function initializeApp() {
+  initializeTheme();
   $("#currentDate").textContent = new Date().toLocaleDateString("en-IN", {
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   });
