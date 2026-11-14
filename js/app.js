@@ -3,14 +3,14 @@ const BUDGET_KEY = "daily-ledger-budget-v1";
 const DEFAULT_BUDGET = 10000;
 
 const CATEGORY_META = {
-  Food: { icon: "🍜", color: "#4edea3" },
-  Transport: { icon: "🚌", color: "#83cfff" },
-  Shopping: { icon: "🛍️", color: "#b9a4ff" },
-  Education: { icon: "📚", color: "#ffc77d" },
-  Entertainment: { icon: "🎬", color: "#ff8585" },
-  Health: { icon: "💊", color: "#70d6c1" },
-  Bills: { icon: "🧾", color: "#e4a8d8" },
-  Other: { icon: "📌", color: "#91a0af" }
+  Food: { icon: "🍜", color: "#c47a56" },
+  Transport: { icon: "🚌", color: "#718f85" },
+  Shopping: { icon: "🛍️", color: "#a58aaa" },
+  Education: { icon: "📚", color: "#d1a15e" },
+  Entertainment: { icon: "🎬", color: "#c47772" },
+  Health: { icon: "💊", color: "#83a38d" },
+  Bills: { icon: "🧾", color: "#a7957e" },
+  Other: { icon: "📌", color: "#92958b" }
 };
 
 let expenses = loadExpenses();
@@ -237,12 +237,12 @@ function drawSpendingChart() {
       labels,
       datasets: [{
         data: values,
-        borderColor: "#3d8062",
-        backgroundColor: "rgba(61, 128, 98, .10)",
+        borderColor: "#b96d4c",
+        backgroundColor: "rgba(185, 109, 76, .12)",
         fill: true,
         tension: .35,
         pointRadius: 3,
-        pointBackgroundColor: "#3d8062"
+        pointBackgroundColor: "#b96d4c"
       }]
     },
     options: {
@@ -252,7 +252,7 @@ function drawSpendingChart() {
         x: { grid: { display: false }, ticks: { color: "#77827b" } },
         y: {
           beginAtZero: true,
-          grid: { color: "#e5e9e2" },
+          grid: { color: "#e8e0d5" },
           ticks: { color: "#91a0af", callback: (value) => "₹" + value }
         }
       }
