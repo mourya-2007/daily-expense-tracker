@@ -825,3 +825,20 @@ html[data-theme="dark"] .budget-foot strong { color: #e3eee6; }
 @media (prefers-reduced-motion: reduce) {
   html, body, .panel, .theme-option { transition: none !important; }
 }
+
+
+/* Keep legacy component tokens aligned with the selected appearance. */
+html[data-theme="dark"] {
+  --bg: #101916;
+  --sidebar: #172820;
+  --panel: #1c2b24;
+  --panel-raised: #263a2f;
+  --field: #14231c;
+  --line: rgba(211,235,220,.13);
+  --text: #e5eee8;
+  --muted: #a1b1a7;
+  --green: #92c9ac;
+  --green-soft: rgba(113,183,143,.14);
+  --green-deep: #203b2c;
+  --red: #f28b80;
+}
