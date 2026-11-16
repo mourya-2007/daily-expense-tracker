@@ -1,0 +1,43 @@
+name: Import final project bundle
+on:
+  push:
+    paths:
+      - ".final-project-import.zip"
+      - ".github/workflows/import-final-project.yml"
+permissions:
+  contents: write
+jobs:
+  import-final-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Replace repository files with final bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f .final-project-import.zip ]; then
+            echo "Import bundle already consumed; nothing to do."
+            exit 0
+          fi
+          rm -rf /tmp/daily-ledger-final
+          mkdir -p /tmp/daily-ledger-final
+          unzip -q .final-project-import.zip -d /tmp/daily-ledger-final
+          source_dir="/tmp/daily-ledger-final/daily-expense-tracker-main"
+          test -s "$source_dir/index.html"
+          test -s "$source_dir/README.md"
+          test -s "$source_dir/css/style.css"
+          test -s "$source_dir/js/app.js"
+          rm -rf css js
+          cp -a "$source_dir/css" ./css
+          cp -a "$source_dir/js" ./js
+          cp "$source_dir/index.html" ./index.html
+          cp "$source_dir/README.md" ./README.md
+          rm -f .final-project-import.zip
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Replace project with final uploaded version"
+          git push origin HEAD:main
