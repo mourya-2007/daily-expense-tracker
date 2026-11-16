@@ -2,6 +2,8 @@
 
 A personal expense tracker built with **HTML, CSS and vanilla JavaScript**. It uses browser `localStorage` for persistence, so no account, backend or build tools are required.
 
+Daily Expense Tracker Link : https://mourya-2007.github.io/daily-expense-tracker/
+
 ## Features
 
 - Dashboard with today's spending, monthly total, remaining budget and recent activity
