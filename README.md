@@ -14,21 +14,6 @@ Daily Expense Tracker Link : https://mourya-2007.github.io/daily-expense-tracker
 - Spending trend and category analytics with Chart.js
 - Responsive liquid-glass interface with light/dark modes and INR formatting
 
-## Run locally
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/mourya-2007/daily-expense-tracker.git
-   ```
-2. Open the folder in VS Code.
-3. Open `index.html` in a browser, or use the Live Server extension.
-
-No installation or build step is required.
-
-## Data and privacy
-
-Expenses and the budget are stored in the current browser profile using `localStorage`. They are not uploaded or synced across devices. Clearing the browser's site data can delete them. Chart.js and Google Fonts are loaded from CDNs and need an internet connection.
-
 ## Tech stack
 
 HTML5 · CSS3 · Vanilla JavaScript · localStorage · Chart.js
@@ -43,8 +28,3 @@ daily-expense-tracker/
 └── js/
     └── app.js
 ```
-
-
-## Appearance
-
-The interface supports liquid-glass light and dark modes. Your selected appearance is remembered in the browser using local storage.
